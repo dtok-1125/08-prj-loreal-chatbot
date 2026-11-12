@@ -9,6 +9,8 @@ const startNewButton = document.getElementById("startNewBtn");
 const workerUrl =
   "https://loreal-beauty-assistant.danielletokarz1125.workers.dev/";
 const welcomeMessage = "👋 Hello! How can I help you today?";
+const closingMessage =
+  "Great! ✨ It was a pleasure helping you today. Remember, beauty is all about what makes you feel confident. Have a beautiful day!";
 const loadingMessages = [
   "✨ Finding a little inspiration for you...",
   "💄 Exploring your beauty possibilities...",
@@ -20,7 +22,7 @@ const finishingMessage = "✨ Putting the finishing touches on your advice...";
 const systemMessage = {
   role: "system",
   content:
-    "You are a helpful beauty advisor for this L'Oréal-inspired chatbot. Help people explore beauty products and build routines with friendly, practical guidance. Always respond with a JSON object containing a conversational reply string in the 'reply' field. When you need more information to personalize your recommendation, include a 'choices' array with 2 to 4 short, relevant answer strings. When no clarification is needed, omit 'choices' or use an empty array.",
+    "You are a helpful beauty advisor for this L'Oréal-inspired chatbot. Help people explore beauty products and build routines with friendly, practical guidance. Always respond with a JSON object containing a conversational reply string in the 'reply' field and a 'choices' array. After giving useful advice or product recommendations, include 2 or 3 short, relevant follow-up choices based on the specific reply, then include a final closing choice exactly phrased 'No thanks, that's all!'. Tailor choices to the topic, including skincare, haircare, makeup, or fragrance. Do not include choices after a closing message. Keep the reply warm and helpful, and do not say 'You're welcome' unless the customer has thanked you.",
 };
 
 // Keep successful questions and answers so follow-up questions have context.
@@ -30,6 +32,7 @@ let loadingTimer = null;
 let nextLoadingMessageIndex = 0;
 let activeRequestController = null;
 let activeRequestId = 0;
+let consultationEnded = false;
 
 // Add a message as text so user input is displayed safely.
 function addMessage(message, sender, beforeElement = null) {
@@ -37,8 +40,14 @@ function addMessage(message, sender, beforeElement = null) {
   messageElement.classList.add("msg", sender);
   messageElement.textContent = message;
   chatWindow.insertBefore(messageElement, beforeElement);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
   return messageElement;
+}
+
+// Scroll only the chat window until the given message reaches its top edge.
+function scrollChatToMessage(messageElement) {
+  const messageTop = messageElement.getBoundingClientRect().top;
+  const chatTop = chatWindow.getBoundingClientRect().top;
+  chatWindow.scrollTop += messageTop - chatTop;
 }
 
 // Stop rotating the loading message and clear its timer.
@@ -99,8 +108,128 @@ function showChoices(choices) {
   });
 
   chatWindow.appendChild(choiceGroup);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
   activeChoices = choiceGroup;
+}
+
+// Find the last assistant reply so a short "No" can be understood in context.
+function getLastAssistantReply() {
+  const lastAssistantMessage = [...conversationHistory]
+    .reverse()
+    .find((message) => message.role === "assistant");
+
+  if (!lastAssistantMessage) {
+    return "";
+  }
+
+  try {
+    return JSON.parse(lastAssistantMessage.content).reply || "";
+  } catch {
+    return lastAssistantMessage.content;
+  }
+}
+
+// Recognize complete closing phrases without matching unrelated questions.
+function isClosingResponse(message) {
+  const normalizedMessage = message
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const withoutPoliteEnding = normalizedMessage.replace(
+    /\s+(thanks|thank you)$/,
+    "",
+  );
+
+  const closingPhrases = [
+    "no thats all",
+    "no thats all for now",
+    "thats all",
+    "thats all for now",
+    "im all set",
+    "im all set for now",
+    "no im all set",
+    "no im all set for now",
+    "no im good",
+    "no im good for now",
+    "no thanks",
+    "no thanks thats all",
+    "no thank you",
+    "no thats it",
+    "no thats it for now",
+    "thats everything",
+    "thats everything for now",
+    "no thats everything",
+    "nothing else",
+    "nothing else for now",
+    "thats it",
+    "thats it for now",
+    "all done",
+    "all done for now",
+    "im good",
+    "im good for now",
+    "im done",
+    "im done for now",
+    "im finished",
+    "im finished for now",
+    "that will be all",
+    "thatll be all",
+    "no more questions",
+    "nope thats all",
+    "nope im all set",
+  ];
+
+  if (
+    closingPhrases.includes(normalizedMessage) ||
+    closingPhrases.includes(withoutPoliteEnding)
+  ) {
+    return true;
+  }
+
+  // A brief "No" is a closing only when the assistant asked if more help is needed.
+  const assistantReply = getLastAssistantReply();
+  const assistantAskedIfMoreIsNeeded =
+    /\b(anything else|anything more|need anything else|need anything more|more questions|more help|can i help with anything else|would you like .* help)\b/i.test(
+      assistantReply,
+    );
+
+  return (
+    assistantAskedIfMoreIsNeeded &&
+    ["no", "nope", "no thanks", "no thank you"].includes(normalizedMessage)
+  );
+}
+
+// Do not offer more choices when the assistant has already said goodbye.
+function isAssistantClosingReply(message) {
+  return (
+    message.trim() === closingMessage ||
+    /\b(it was a pleasure helping you|have a beautiful day|thanks for chatting|goodbye|take care)\b[.!✨\s]*$/i.test(
+      message.trim(),
+    )
+  );
+}
+
+// Keep a couple of useful choices available even if the Worker omits them.
+function getFollowUpChoices(suggestedChoices) {
+  const choices = [
+    ...new Set(suggestedChoices.filter((choice) => !isClosingResponse(choice))),
+  ];
+  const fallbackChoices = [
+    "How do I use the recommendations you mentioned?",
+    "Which recommendation best suits my needs?",
+  ];
+
+  fallbackChoices.forEach((choice) => {
+    if (choices.length < 2 && !choices.includes(choice)) {
+      choices.push(choice);
+    }
+  });
+
+  const closingChoice =
+    suggestedChoices.find((choice) => isClosingResponse(choice)) ||
+    "No thanks, that's all!";
+
+  return [...choices.slice(0, 3), closingChoice];
 }
 
 // Reset the conversation without reloading the page.
@@ -115,6 +244,8 @@ function startNewConsultation() {
   }
 
   sendButton.disabled = false;
+  userInput.disabled = false;
+  consultationEnded = false;
   conversationHistory.splice(0, conversationHistory.length, systemMessage);
   activeChoices = null;
   userInput.value = "";
@@ -142,7 +273,7 @@ startNewButton.addEventListener("click", startNewConsultation);
 chatForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (sendButton.disabled) {
+  if (sendButton.disabled || consultationEnded) {
     return;
   }
 
@@ -161,8 +292,26 @@ chatForm.addEventListener("submit", async (event) => {
   addMessage(question, "user");
   userInput.value = "";
 
+  // End the consultation locally without sending a closing response to the Worker.
+  if (isClosingResponse(question)) {
+    consultationEnded = true;
+    userInput.disabled = true;
+    sendButton.disabled = true;
+    const goodbyeBubble = addMessage(closingMessage, "ai");
+    scrollChatToMessage(goodbyeBubble);
+    conversationHistory.push(
+      { role: "user", content: question },
+      {
+        role: "assistant",
+        content: JSON.stringify({ reply: closingMessage }),
+      },
+    );
+    return;
+  }
+
   const loadingMessage = addMessage("", "ai");
   startLoadingMessages(loadingMessage);
+  scrollChatToMessage(loadingMessage);
   const userMessage = { role: "user", content: question };
   const requestId = ++activeRequestId;
   const requestController = new AbortController();
@@ -209,16 +358,19 @@ chatForm.addEventListener("submit", async (event) => {
     // Stop the loading text and show the assistant's reply.
     stopLoadingMessages();
     loadingMessage.remove();
-    addMessage(assistantReply, "ai");
+    const replyBubble = addMessage(assistantReply, "ai");
 
-    const choices = Array.isArray(structuredReply.choices)
+    const suggestedChoices = Array.isArray(structuredReply.choices)
       ? structuredReply.choices
           .filter((choice) => typeof choice === "string" && choice.trim())
-          .slice(0, 4)
       : [];
-    if (choices.length >= 2) {
-      showChoices(choices);
+
+    if (!isAssistantClosingReply(assistantReply)) {
+      showChoices(getFollowUpChoices(suggestedChoices));
     }
+
+    // Keep the start of the reply in view instead of jumping to its choices.
+    scrollChatToMessage(replyBubble);
 
     // Save successful turns so the assistant understands follow-up questions.
     conversationHistory.push(userMessage, {
@@ -233,10 +385,11 @@ chatForm.addEventListener("submit", async (event) => {
     console.error("Could not get a reply from the beauty assistant:", error);
     stopLoadingMessages();
     loadingMessage.remove();
-    addMessage(
+    const errorBubble = addMessage(
       "I'm sorry, I couldn't connect right now. Please try again in a moment.",
       "ai",
     );
+    scrollChatToMessage(errorBubble);
   } finally {
     if (requestId === activeRequestId) {
       stopLoadingMessages();
