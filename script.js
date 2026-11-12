@@ -27,6 +27,7 @@ const systemMessage = {
 const conversationHistory = [systemMessage];
 let activeChoices = null;
 let loadingTimer = null;
+let nextLoadingMessageIndex = 0;
 let activeRequestController = null;
 let activeRequestId = 0;
 
@@ -50,8 +51,13 @@ function stopLoadingMessages() {
 
 // Change the loading text every few seconds while the Worker responds.
 function startLoadingMessages(messageElement) {
-  let messageIndex = 0;
+  // Start fresh so only one loading-message interval can run at a time.
+  stopLoadingMessages();
+
+  let messageIndex = nextLoadingMessageIndex;
   messageElement.textContent = loadingMessages[messageIndex];
+  nextLoadingMessageIndex =
+    (nextLoadingMessageIndex + 1) % loadingMessages.length;
 
   loadingTimer = setInterval(() => {
     messageIndex = (messageIndex + 1) % loadingMessages.length;
