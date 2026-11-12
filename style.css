@@ -132,6 +132,51 @@ main {
   scrollbar-width: thin;
 }
 
+.starter-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.starter-button {
+  display: inline-flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 11px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #101010;
+  color: var(--warm-white);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.starter-mark {
+  flex: 0 0 auto;
+  color: var(--gold);
+}
+
+.starter-button:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+  background: var(--surface-raised);
+}
+
+.starter-button:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 3px;
+}
+
 /* Assistant and visitor messages share a base, then align to opposite sides. */
 .msg {
   width: fit-content;
