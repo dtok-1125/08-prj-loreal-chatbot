@@ -13,9 +13,9 @@ const loadingMessages = [
   "✨ Finding a little inspiration for you...",
   "💄 Exploring your beauty possibilities...",
   "🌸 Personalizing your recommendations...",
-  "✨ Putting the finishing touches on your advice...",
   "💛 Curating something just for you...",
 ];
+const finishingMessage = "✨ Putting the finishing touches on your advice...";
 
 const systemMessage = {
   role: "system",
@@ -55,13 +55,22 @@ function startLoadingMessages(messageElement) {
   stopLoadingMessages();
 
   let messageIndex = nextLoadingMessageIndex;
+  let messagesShown = 1;
   messageElement.textContent = loadingMessages[messageIndex];
   nextLoadingMessageIndex =
     (nextLoadingMessageIndex + 1) % loadingMessages.length;
 
   loadingTimer = setInterval(() => {
+    // Show the finishing message only after each rotating message has appeared.
+    if (messagesShown === loadingMessages.length) {
+      messageElement.textContent = finishingMessage;
+      stopLoadingMessages();
+      return;
+    }
+
     messageIndex = (messageIndex + 1) % loadingMessages.length;
     messageElement.textContent = loadingMessages[messageIndex];
+    messagesShown += 1;
   }, 2500);
 }
 
