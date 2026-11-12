@@ -24,7 +24,7 @@ body {
     radial-gradient(ellipse at 50% 32%, rgb(227 165 53 / 6%), transparent 48%),
     var(--black);
   color: var(--warm-white);
-  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -40,7 +40,7 @@ body {
   display: flex;
   justify-content: center;
   padding: 24px 24px;
-  border-bottom: 1px solid rgb(227 165 53 / 28%);
+  border-bottom: 2px solid rgb(227 165 53 / 28%);
   background: #ffffff;
 }
 
@@ -59,9 +59,9 @@ body {
 }
 
 .brand-divider {
-  width: 1px;
+  width: 2px;
   height: 28px;
-  flex: 0 0 1px;
+  flex: 0 0 2px;
   background: var(--gold);
 }
 
@@ -203,6 +203,7 @@ main {
   border-radius: 50%;
   background: var(--gold);
   color: #17120a;
+  font-family: inherit;
   cursor: pointer;
   transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
