@@ -3,13 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat Assistant</title>
+    <meta name="theme-color" content="#0b0b0b" />
+    <title>L'Oréal Beauty Assistant</title>
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
@@ -17,45 +18,64 @@
 
   <body>
     <div class="page-wrapper">
-      <!------- Header / Branding ------->
       <header class="site-header">
-        <h1 class="site-title">Smart Product Advisor</h1>
+        <div class="brand">
+          <span class="brand-name">L'ORÉAL</span>
+          <span class="brand-divider" aria-hidden="true"></span>
+          <span class="brand-subtitle">YOUR PERSONAL BEAUTY ASSISTANT</span>
+        </div>
       </header>
 
-      <!------- Chat Area ------->
       <main>
-        <section class="chatbox">
-          <div id="chatWindow" class="chat-window">
-            <!-- messages will be appended here via JS -->
+        <section class="consultation" aria-labelledby="welcomeTitle">
+          <div class="intro">
+            <p class="eyebrow">A MOMENT, JUST FOR YOU</p>
+            <h1 id="welcomeTitle">Your beauty journey<br />begins here.</h1>
+            <p class="intro-copy">
+              Discover products, explore routines, and find what makes you feel
+              beautiful.
+            </p>
           </div>
 
-          <form id="chatForm" class="chat-form">
-            <label for="userInput" class="visually-hidden">Message</label>
-            <input
-              id="userInput"
-              name="userInput"
-              type="text"
-              placeholder="Ask me about products or routines…"
-              autocomplete="off"
-              required
-            />
-            <button type="submit" id="sendBtn">
-              <span class="material-icons">send</span>
-              <span class="visually-hidden">Send</span>
-            </button>
-          </form>
+          <section class="chatbox" aria-label="Beauty consultation chat">
+            <div
+              id="chatWindow"
+              class="chat-window"
+              role="log"
+              aria-live="polite"
+              aria-relevant="additions"
+            >
+              <!-- Messages will be added here by the chat script. -->
+            </div>
+
+            <form id="chatForm" class="chat-form">
+              <label for="userInput" class="visually-hidden">Your message</label>
+              <input
+                id="userInput"
+                name="userInput"
+                type="text"
+                placeholder="Ask about products or routines..."
+                autocomplete="off"
+                required
+              />
+              <button type="submit" id="sendBtn">
+                <span class="material-icons" aria-hidden="true">
+                  arrow_upward
+                </span>
+                <span class="visually-hidden">Send message</span>
+              </button>
+            </form>
+            <p class="chat-note">A little inspiration, one conversation at a time.</p>
+          </section>
         </section>
       </main>
 
-      <!------- Footer Links ------->
       <footer class="site-footer">
-        <p>&copy; 2025 Company Name. All rights reserved.</p>
-        <nav>
-          <!-- These URLs are placeholders -->
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
-          <a href="#">Contact</a>
-        </nav>
+        <span class="footer-mark" aria-hidden="true"></span>
+        <p>
+          A beauty consultation project inspired by L'Oréal
+          <span aria-hidden="true">·</span> An independent concept
+        </p>
       </footer>
     </div>
 

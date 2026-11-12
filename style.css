@@ -1,113 +1,261 @@
-/* —— basic reset —— */
+/* Keep sizing predictable across the page. */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* —— body + fonts —— */
+:root {
+  color-scheme: dark;
+  --black: #0b0b0b;
+  --surface: #141414;
+  --surface-raised: #1b1a18;
+  --gold: #e3a535;
+  --gold-light: #f0c46d;
+  --warm-white: #f7f3eb;
+  --muted: #aaa49a;
+  --line: rgb(227 165 53 / 24%);
+}
+
 body {
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 32%, rgb(227 165 53 / 6%), transparent 48%),
+    var(--black);
+  color: var(--warm-white);
   font-family: "Montserrat", Arial, Helvetica, sans-serif;
-  color: #333;
-  display: flex;
-  justify-content: center;
+  -webkit-font-smoothing: antialiased;
 }
 
 .page-wrapper {
-  width: 90%;
-  max-width: 900px;
+  width: min(100% - 48px, 1120px);
+  min-height: 100vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
-/* header */
+/* Brand wordmark and descriptor. */
 .site-header {
+  display: flex;
+  justify-content: center;
+  padding: 34px 0;
+  border-bottom: 1px solid rgb(247 243 235 / 10%);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-name {
+  color: var(--warm-white);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  line-height: 1;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--gold);
+}
+
+.brand-subtitle {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+main {
+  flex: 1;
+}
+
+.consultation {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 74px 0 42px;
+}
+
+.intro {
+  margin-bottom: 38px;
   text-align: center;
-  padding-top: 50px;
 }
 
-.site-title {
-  font-size: 22px;
-  font-weight: 500;
-  margin-bottom: 10px;
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
 }
 
-/* chat window */
+.intro h1 {
+  color: var(--warm-white);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(42px, 6vw, 66px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+}
+
+.intro-copy {
+  max-width: 470px;
+  margin: 18px auto 0;
+  color: #c1bbb1;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
 .chatbox {
-  margin: 40px 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 2%), transparent 42%), var(--surface);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 36%);
 }
 
 .chat-window {
-  height: 360px;
-  border: 1px solid #000;
-  padding: 20px;
-  font-size: 18px;
-  line-height: 1.5;
+  display: flex;
+  min-height: 270px;
+  max-height: 420px;
+  flex-direction: column;
+  gap: 16px;
   overflow-y: auto;
-  background: #fafafa;
-  white-space: pre-line;
+  padding: 28px;
+  scrollbar-color: #5b492d transparent;
+  scrollbar-width: thin;
 }
 
-/* messages */
+/* Assistant and visitor messages share a base, then align to opposite sides. */
 .msg {
-  margin-bottom: 14px;
-  line-height: 1.5;
-}
-
-.msg.user {
-  color: #000;
+  width: fit-content;
+  max-width: min(84%, 520px);
+  padding: 14px 18px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+  animation: message-in 260ms ease-out both;
 }
 
 .msg.ai {
-  color: #666666;
+  align-self: flex-start;
+  border-color: rgb(247 243 235 / 7%);
+  border-bottom-left-radius: 4px;
+  background: var(--surface-raised);
+  color: var(--warm-white);
 }
 
-/* input row */
+.msg.user {
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  background: var(--gold);
+  color: #17120a;
+}
+
 .chat-form {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
+  padding: 0 22px 18px;
 }
 
 .chat-form input {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  font-size: 18px;
+  width: 100%;
+  min-width: 0;
+  height: 54px;
+  padding: 0 18px;
+  border: 1px solid rgb(247 243 235 / 16%);
+  border-radius: 3px;
+  outline: none;
+  background: #101010;
+  color: var(--warm-white);
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.chat-form input:focus {
-  outline: 2px solid #000;
-  outline-offset: 2px;
+.chat-form input::placeholder {
+  color: #88837a;
+  opacity: 1;
+}
+
+.chat-form input:focus-visible {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgb(227 165 53 / 16%);
 }
 
 .chat-form button {
-  font-size: 18px;
-  background: #000;
-  color: #fff;
-  border: none;
-  padding: 12px;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  place-items: center;
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  background: var(--gold);
+  color: #17120a;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
 .chat-form button .material-icons {
-  font-size: 24px;
+  font-size: 23px;
 }
 
 .chat-form button:hover {
-  background: #666666;
+  transform: translateY(-2px);
+  border-color: var(--gold-light);
+  background: var(--gold-light);
 }
 
-.chat-form button:focus {
-  outline: 2px solid #000;
-  outline-offset: 2px;
+.chat-form button:focus-visible {
+  outline: 2px solid var(--warm-white);
+  outline-offset: 3px;
 }
 
-/* visually hidden */
+.chat-note {
+  padding: 0 22px 18px;
+  color: #827c73;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px 0 26px;
+  border-top: 1px solid rgb(247 243 235 / 10%);
+  color: #8f897f;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.footer-mark {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.site-footer p span {
+  padding: 0 4px;
+  color: var(--gold);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -120,24 +268,100 @@ body {
   border: 0;
 }
 
-/* footer */
-.site-footer {
-  margin: 60px 0 40px;
-  text-align: center;
-  font-size: 14px;
-  color: #666;
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.site-footer nav {
-  margin-top: 12px;
+@media (max-width: 600px) {
+  .page-wrapper {
+    width: min(100% - 32px, 480px);
+  }
+
+  .site-header {
+    padding: 24px 0;
+  }
+
+  .brand {
+    gap: 12px;
+  }
+
+  .brand-name {
+    font-size: 25px;
+  }
+
+  .brand-divider {
+    height: 23px;
+  }
+
+  .brand-subtitle {
+    max-width: 125px;
+    font-size: 8px;
+    line-height: 1.5;
+  }
+
+  .consultation {
+    padding: 58px 0 30px;
+  }
+
+  .intro {
+    margin-bottom: 28px;
+  }
+
+  .intro-copy {
+    max-width: 340px;
+    font-size: 12px;
+  }
+
+  .chat-window {
+    min-height: 290px;
+    padding: 20px 16px;
+  }
+
+  .msg {
+    max-width: 90%;
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+
+  .chat-form {
+    gap: 8px;
+    padding: 0 14px 15px;
+  }
+
+  .chat-form input,
+  .chat-form button {
+    height: 50px;
+  }
+
+  .chat-form button {
+    width: 50px;
+    flex-basis: 50px;
+  }
+
+  .chat-note {
+    padding: 0 14px 16px;
+    font-size: 9px;
+  }
+
+  .site-footer {
+    font-size: 9px;
+  }
 }
 
-.site-footer a {
-  margin: 0 8px;
-  color: #000;
-  text-decoration: none;
-}
-
-.site-footer a:hover {
-  color: #666666;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
