@@ -42,12 +42,23 @@
           </div>
 
           <section class="chatbox" aria-label="Beauty consultation chat">
+            <div class="chat-toolbar">
+              <button
+                type="button"
+                id="startNewBtn"
+                class="start-new-button"
+                aria-label="Start a new consultation"
+              >
+                <span class="material-icons" aria-hidden="true">restart_alt</span>
+                <span>Start New</span>
+              </button>
+            </div>
             <div
               id="chatWindow"
               class="chat-window"
               role="log"
               aria-live="polite"
-              aria-relevant="additions"
+              aria-relevant="additions text"
             >
               <!-- Messages will be added here by the chat script. -->
               <div
