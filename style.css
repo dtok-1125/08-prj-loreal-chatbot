@@ -476,11 +476,19 @@ main {
   }
 
   .consultation {
-    padding: 58px 0 calc(78px + env(safe-area-inset-bottom, 0px));
+    padding: 30px 0 calc(78px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .eyebrow {
+    margin-bottom: 10px;
+  }
+
+  .intro-copy {
+    margin-top: 10px;
   }
 
   .intro {
-    margin-bottom: 28px;
+    margin-bottom: 8px;
   }
 
   .intro-copy {
