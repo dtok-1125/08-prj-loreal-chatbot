@@ -85,7 +85,7 @@ main {
 .consultation {
   width: min(100%, 760px);
   margin: 0 auto;
-  padding: 54px 0 42px;
+  padding: 64px 0 42px;
 }
 
 .intro {
@@ -488,7 +488,7 @@ main {
   }
 
   .intro {
-    margin-bottom: 0;
+    margin-bottom: 12px;
   }
 
   .intro-copy {
