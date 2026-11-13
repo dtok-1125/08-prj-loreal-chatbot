@@ -28,7 +28,8 @@ const systemMessage = {
     "Be accurate and transparent. Do not invent product details, promotions, prices, availability, or rewards-program information. If you cannot verify a detail, say so and suggest checking the official L'Oréal Paris website. " +
     "Use the conversation history in this consultation to remember beauty preferences the customer has actually shared, such as skin or hair type, concerns, desired results, product preferences, and relevant product features. When a follow-up makes those details relevant, briefly connect your advice to the customer's earlier goals. Acknowledge their needs naturally and only when it adds value; do not repeat their whole history or make assumptions. " +
     "If the customer voluntarily shares their name, you may use it occasionally and naturally, but never invent a name or require one. Do not claim to remember details that are not in this consultation's conversation history. " +
-    "Always respond with a JSON object containing a conversational reply string in the 'reply' field and a 'choices' array. After useful beauty advice or a redirect, include 2 or 3 short follow-up choices that stay within skincare, haircare, makeup, or fragrance. For an unrelated question, make every follow-up choice about returning to one of those beauty topics. Include a final choice exactly phrased 'No thanks, that's all!'. Do not include choices after a closing message. Keep the reply warm and helpful, and do not say 'You're welcome' unless the customer has thanked you.",
+    "Keep quick beauty answers concise, prioritize the 2 or 3 most relevant recommendations, and explain things simply and conversationally. For routines, tutorials, or step-by-step advice, include every necessary step in a short, easy-to-scan numbered list with brief explanations; add useful detail without forcing the answer into a word limit. Avoid unnecessary introductions and repeated details. " +
+    "Always respond with a JSON object containing a conversational reply string in the 'reply' field and a 'choices' array. After useful beauty advice or a redirect, include 2 or 3 concise, relevant follow-up choices phrased as short questions or prompts that stay within skincare, haircare, makeup, or fragrance. Avoid long follow-up questions. For an unrelated question, make every follow-up choice about returning to one of those beauty topics. Include a final choice exactly phrased 'No thanks, that's all!'. Do not include choices after a closing message. Keep the reply warm and helpful, and do not say 'You're welcome' unless the customer has thanked you.",
 };
 
 // Keep successful questions and answers so follow-up questions have context.
@@ -221,11 +222,12 @@ function getFollowUpChoices(suggestedChoices) {
     ...new Set(suggestedChoices.filter((choice) => !isClosingResponse(choice))),
   ];
   const fallbackChoices = [
-    "Can you suggest a skincare routine for me?",
-    "What makeup, haircare, or fragrance tips do you recommend?",
+    "Help me build a skincare routine",
+    "Suggest makeup, haircare, or fragrance tips",
   ];
 
   fallbackChoices.forEach((choice) => {
+    // Keep at least two concise beauty suggestions when the Worker returns fewer.
     if (choices.length < 2 && !choices.includes(choice)) {
       choices.push(choice);
     }
@@ -235,6 +237,7 @@ function getFollowUpChoices(suggestedChoices) {
     suggestedChoices.find((choice) => isClosingResponse(choice)) ||
     "No thanks, that's all!";
 
+  // Show no more than three suggestions, followed by the closing option.
   return [...choices.slice(0, 3), closingChoice];
 }
 
@@ -295,7 +298,7 @@ chatForm.addEventListener("submit", async (event) => {
     activeChoices = null;
   }
 
-  addMessage(question, "user");
+  const questionBubble = addMessage(question, "user");
   userInput.value = "";
 
   // End the consultation locally without sending a closing response to the Worker.
@@ -303,8 +306,8 @@ chatForm.addEventListener("submit", async (event) => {
     consultationEnded = true;
     userInput.disabled = true;
     sendButton.disabled = true;
-    const goodbyeBubble = addMessage(closingMessage, "ai");
-    scrollChatToMessage(goodbyeBubble);
+    addMessage(closingMessage, "ai");
+    scrollChatToMessage(questionBubble);
     conversationHistory.push(
       { role: "user", content: question },
       {
@@ -317,7 +320,7 @@ chatForm.addEventListener("submit", async (event) => {
 
   const loadingMessage = addMessage("", "ai");
   startLoadingMessages(loadingMessage);
-  scrollChatToMessage(loadingMessage);
+  scrollChatToMessage(questionBubble);
   const userMessage = { role: "user", content: question };
   const requestId = ++activeRequestId;
   const requestController = new AbortController();
@@ -364,7 +367,7 @@ chatForm.addEventListener("submit", async (event) => {
     // Stop the loading text and show the assistant's reply.
     stopLoadingMessages();
     loadingMessage.remove();
-    const replyBubble = addMessage(assistantReply, "ai");
+    addMessage(assistantReply, "ai");
 
     const suggestedChoices = Array.isArray(structuredReply.choices)
       ? structuredReply.choices
@@ -375,8 +378,8 @@ chatForm.addEventListener("submit", async (event) => {
       showChoices(getFollowUpChoices(suggestedChoices));
     }
 
-    // Keep the start of the reply in view instead of jumping to its choices.
-    scrollChatToMessage(replyBubble);
+    // Keep the latest question at the top so the answer begins just below it.
+    scrollChatToMessage(questionBubble);
 
     // Save successful turns so the assistant understands follow-up questions.
     conversationHistory.push(userMessage, {
