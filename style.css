@@ -417,7 +417,7 @@ main {
   background: var(--gold);
 }
 
-.site-footer p span {
+.site-footer p .footer-separator {
   display: inline-block;
   width: 5px;
   height: 5px;
@@ -426,6 +426,10 @@ main {
   background: var(--gold);
   font-size: 0;
   vertical-align: middle;
+}
+
+.site-footer .footer-mobile-copy {
+  display: none;
 }
 
 .visually-hidden {
@@ -452,6 +456,10 @@ main {
 }
 
 @media (max-width: 600px) {
+  main {
+    flex: 0 0 auto;
+  }
+
   .site-header {
     padding: 6px 12px;
   }
@@ -529,6 +537,31 @@ main {
   .chat-note {
     padding: 0 14px 16px;
     font-size: 14px;
+  }
+
+  .site-footer {
+    flex-wrap: wrap;
+    padding: 18px 12px 22px;
+  }
+
+  .site-footer p {
+    max-width: 100%;
+    line-height: 1.6;
+  }
+
+  .site-footer .footer-mark,
+  .site-footer .footer-desktop-copy {
+    display: none;
+  }
+
+  .site-footer .footer-mobile-copy {
+    display: inline;
+  }
+}
+
+@media (max-width: 600px) and (max-height: 700px) {
+  .chat-window {
+    min-height: 240px;
   }
 }
 
