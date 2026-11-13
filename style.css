@@ -17,6 +17,12 @@
   --line: rgb(227 165 53 / 24%);
 }
 
+@property --border-shimmer-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 body {
   min-width: 320px;
   min-height: 100vh;
@@ -113,11 +119,47 @@ main {
 }
 
 .chatbox {
+  position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: linear-gradient(145deg, rgb(255 255 255 / 2%), transparent 42%), var(--surface);
   box-shadow: 0 24px 70px rgb(0 0 0 / 36%);
+}
+
+.chatbox::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--border-shimmer-angle),
+    transparent 0deg 310deg,
+    rgb(240 196 109 / 20%) 326deg,
+    rgb(240 196 109 / 90%) 340deg,
+    rgb(220 158 145 / 80%) 350deg,
+    rgb(255 237 202 / 90%) 356deg,
+    transparent 360deg
+  );
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.chatbox.is-loading::after {
+  opacity: 1;
+  animation: border-shimmer 2.4s linear infinite;
+}
+
+@keyframes border-shimmer {
+  to {
+    --border-shimmer-angle: 360deg;
+  }
 }
 
 .chat-toolbar {
@@ -291,9 +333,10 @@ main {
   opacity: 1;
 }
 
-.chat-form input:focus-visible {
+.chat-form:focus-within input,
+.chat-form:has(button:disabled) input {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgb(227 165 53 / 16%);
+  box-shadow: 0 0 0 3px rgb(227 165 53 / 16%), 0 0 18px rgb(227 165 53 / 12%);
 }
 
 .chat-form button {
@@ -308,11 +351,31 @@ main {
   color: #17120a;
   font-family: inherit;
   cursor: pointer;
-  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .chat-form button .material-icons {
   font-size: 23px;
+}
+
+.chat-form button.is-sending {
+  animation: send-button-flash 650ms ease-out;
+}
+
+@keyframes send-button-flash {
+  45% {
+    filter: drop-shadow(0 0 8px rgb(240 196 109 / 55%))
+      drop-shadow(0 0 14px rgb(220 158 145 / 25%));
+  }
+}
+
+.chat-form:focus-within button,
+.chat-form:has(button:disabled) button {
+  box-shadow: 0 0 0 4px rgb(227 165 53 / 14%), 0 0 18px rgb(227 165 53 / 28%);
 }
 
 .chat-form button:hover {
@@ -390,26 +453,26 @@ main {
 
 @media (max-width: 600px) {
   .site-header {
-    padding: 20px 16px;
+    padding: 14px 12px;
   }
 
   .brand {
-    gap: 12px;
+    gap: 10px;
   }
 
   .brand-logo {
-    width: 120px;
+    width: 104px;
   }
 
   .brand-divider {
-    height: 23px;
+    height: 22px;
   }
 
   .brand-subtitle {
-    max-width: 130px;
-    font-size: 14px;
-    letter-spacing: 0.1em;
-    line-height: 1.5;
+    max-width: 160px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
   }
 
   .consultation {
@@ -469,5 +532,14 @@ main {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .chatbox.is-loading::after,
+  .chat-form button.is-sending {
+    animation: none !important;
+  }
+
+  .chatbox.is-loading::after {
+    opacity: 0;
   }
 }

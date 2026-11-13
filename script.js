@@ -2,6 +2,7 @@
 const chatForm = document.getElementById("chatForm");
 const userInput = document.getElementById("userInput");
 const chatWindow = document.getElementById("chatWindow");
+const chatbox = document.querySelector(".chatbox");
 const starterSuggestions = document.getElementById("starterSuggestions");
 const sendButton = document.getElementById("sendBtn");
 const startNewButton = document.getElementById("startNewBtn");
@@ -23,6 +24,7 @@ const systemMessage = {
   role: "system",
   content:
     "You are a personal beauty advisor for this L'Oréal-inspired chatbot. Stay focused on skincare and skincare routines, haircare and styling, makeup and cosmetics, fragrances, L'Oréal Paris products, and beauty consultations. " +
+    "Briefly and naturally acknowledge greetings and friendly small talk before guiding the conversation toward beauty help. If asked how you are, respond warmly without claiming human feelings or experiences, for example: \"I'm here and ready to help, thank you for asking! 😊\" Then transition smoothly with a short invitation. Keep your tone welcoming, confident, and polished, not scripted or excessively enthusiastic, and avoid long introductions or repeatedly listing beauty categories. " +
     "If a question is unrelated to beauty, do not answer it. Warmly redirect the conversation to beauty, for example: \"I'm here to help you discover beauty routines and L'Oréal Paris products that work for you! Let's get back to your beauty journey. What can I help you explore today?\" " +
     "If a question has a genuine beauty connection, answer the beauty-related part and do not get sidetracked by unrelated details. " +
     "Be accurate and transparent. Do not invent product details, promotions, prices, availability, or rewards-program information. If you cannot verify a detail, say so and suggest checking the official L'Oréal Paris website. " +
@@ -40,6 +42,24 @@ let nextLoadingMessageIndex = 0;
 let activeRequestController = null;
 let activeRequestId = 0;
 let consultationEnded = false;
+let sendButtonFlashTimer = null;
+
+// Remove the one-shot send glow and its timer.
+function clearSendButtonFlash() {
+  if (sendButtonFlashTimer !== null) {
+    clearTimeout(sendButtonFlashTimer);
+    sendButtonFlashTimer = null;
+  }
+
+  sendButton.classList.remove("is-sending");
+}
+
+// Play a brief glow when the visitor sends a message.
+function flashSendButton() {
+  clearSendButtonFlash();
+  sendButton.classList.add("is-sending");
+  sendButtonFlashTimer = setTimeout(clearSendButtonFlash, 650);
+}
 
 // Add a message as text so user input is displayed safely.
 function addMessage(message, sender, beforeElement = null) {
@@ -245,6 +265,8 @@ function getFollowUpChoices(suggestedChoices) {
 function startNewConsultation() {
   activeRequestId += 1;
   stopLoadingMessages();
+  clearSendButtonFlash();
+  chatbox.classList.remove("is-loading");
 
   // Cancel the previous request and ignore its response if it finishes later.
   if (activeRequestController) {
@@ -291,6 +313,8 @@ chatForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  flashSendButton();
+
   // Hide the starter questions and old answer choices after a new question.
   starterSuggestions.remove();
   if (activeChoices) {
@@ -326,6 +350,7 @@ chatForm.addEventListener("submit", async (event) => {
   const requestController = new AbortController();
   activeRequestController = requestController;
   sendButton.disabled = true;
+  chatbox.classList.add("is-loading");
 
   try {
     const response = await fetch(workerUrl, {
@@ -404,6 +429,8 @@ chatForm.addEventListener("submit", async (event) => {
       stopLoadingMessages();
       activeRequestController = null;
       sendButton.disabled = false;
+      chatbox.classList.remove("is-loading");
+      clearSendButtonFlash();
     }
   }
 });
